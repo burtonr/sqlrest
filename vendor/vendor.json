@@ -1,0 +1,12 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "github.com/gin-gonic/gin",
+			"revision": "",
+			"version": "1.2"
+		}
+	],
+	"rootPath": "github.com/BurtonR/sqlrest"
+}
