@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/BurtonR/sqlrest/handlers"
 	"github.com/gin-gonic/gin"
 )
 
 var DB = make(map[string]string)
 
 func setupRouter() *gin.Engine {
-	// Disable Console Color
-	// gin.DisableConsoleColor()
 	r := gin.Default()
 
 	// Ping test
@@ -52,6 +51,15 @@ func setupRouter() *gin.Engine {
 			c.JSON(200, gin.H{"status": "ok"})
 		}
 	})
+
+	v1 := r.Group("v1")
+	{
+		v1.POST("/query", handlers.ExecuteQuery)
+		v1.POST("/update", handlers.ExecuteUpdate)
+		v1.PUT("/insert", handlers.ExecuteInsert)
+		v1.DELETE("/delete", handlers.ExecuteDelete)
+		v1.POST("/procedure", handlers.ExecuteProcedure)
+	}
 
 	return r
 }

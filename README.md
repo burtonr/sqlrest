@@ -20,6 +20,13 @@ Examples could include (but not limited to):
 
 This follows the familiar REST practices as well as allowing special handling of requests based on the route.
 
+* Versioning
+    * The API routes will be versioned. `localhost:8080/v1/query`
+    * The handler files will include a version if they are of a previous version
+        * When a new version is developed, the previous file and the exported `func` will have the version appended to it
+        * `queryHandler.go` -> `queryHandler.v1.go`
+        * `ExecuteQuery()` -> `ExecuteQueryV1()`
+
 ### Useage 
 * How to define the database to be used for the connection/query/request?
   * Would the caller build the database into the requested SQL statement? `SELECT * FROM [SomeDB].[dbo].[TheTable]`
