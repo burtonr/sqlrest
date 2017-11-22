@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-var Connection *sql.DB
+type SqlDatabase struct {
+	Connection *sql.DB
+}
 
 func GetConnection() (*sql.DB, error) {
 	userid := "username"
@@ -15,25 +17,19 @@ func GetConnection() (*sql.DB, error) {
 
 	dsn := "server=" + server + ";user id=" + userid + ";password=" + password // + ";database=" + database
 
-	fmt.Println(Connection)
-
-	if Connection != nil {
-		return Connection, nil
-	}
-
-	Connection, err := sql.Open("mssql", dsn)
+	connection, err := sql.Open("mssql", dsn)
 	if err != nil {
 		fmt.Println("Cannot connect: ", err.Error())
 		return nil, err
 	}
-	err = Connection.Ping()
+	err = connection.Ping()
 	if err != nil {
 		fmt.Println("Cannot connect: ", err.Error())
 		return nil, err
 	}
 	// defer db.Close()
 
-	return Connection, err
+	return connection, err
 }
 
 func Execute(db *sql.DB, cmd string) error {
