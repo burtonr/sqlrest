@@ -1,9 +1,9 @@
 package handlers
 
-import "fmt"
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 func ExecuteUpdate(c *gin.Context) {
-	fmt.Println("Executing the update")
-	return
+	c.JSON(200, gin.H{"message": "Handling the UPDATE"})
 }

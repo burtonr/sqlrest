@@ -1,12 +1,9 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 )
 
 func ExecuteInsert(c *gin.Context) {
-	fmt.Println("executing the insert")
-	return
+	c.JSON(200, gin.H{"message": "Handling the INSERT"})
 }
