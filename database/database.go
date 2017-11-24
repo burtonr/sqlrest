@@ -11,7 +11,7 @@ type SqlDatabase struct {
 }
 
 func GetConnection() (*sql.DB, error) {
-	userid := "username"
+	userid := "sa"
 	password := "p@ssw0rd"
 	server := "localhost"
 
@@ -27,69 +27,72 @@ func GetConnection() (*sql.DB, error) {
 		fmt.Println("Cannot connect: ", err.Error())
 		return nil, err
 	}
-	// defer db.Close()
 
 	return connection, err
 }
 
-func Execute(db *sql.DB, cmd string) error {
+func Execute(db *sql.DB, cmd string) ([][]string, error) {
 	rows, err := db.Query(cmd)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
 	cols, err := rows.Columns()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if cols == nil {
-		return nil
+		return nil, nil
 	}
+
+	// TODO: Somehow need to dynamically allocate the slice size based on the amount of rows being returned
+	results := make([][]string, 3)
+	results[0] = cols
+
 	vals := make([]interface{}, len(cols))
 	for i := 0; i < len(cols); i++ {
 		vals[i] = new(interface{})
-		if i != 0 {
-			fmt.Print("\t")
-		}
-		fmt.Print(cols[i])
 	}
-	fmt.Println()
+
+	rowCount := 1
+
 	for rows.Next() {
 		err = rows.Scan(vals...)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		for i := 0; i < len(vals); i++ {
-			if i != 0 {
-				fmt.Print("\t")
-			}
-			printValue(vals[i].(*interface{}))
-		}
-		fmt.Println()
 
+		results[rowCount] = append(make([]string, len(cols)))
+
+		for i := 0; i < len(vals); i++ {
+			results[rowCount][i] = printValue(vals[i].(*interface{}))
+		}
+		rowCount++
 	}
 	if rows.Err() != nil {
-		return rows.Err()
+		return nil, rows.Err()
 	}
-	return nil
+	return results, nil
 }
 
-func printValue(pval *interface{}) {
+func printValue(pval *interface{}) string {
 	switch v := (*pval).(type) {
 	case nil:
-		fmt.Print("NULL")
+		return "NULL"
 	case bool:
 		if v {
-			fmt.Print("1")
-		} else {
-			fmt.Print("0")
+			return "1"
 		}
+		return "0"
 	case []byte:
-		fmt.Print(string(v))
+		return string(v)
 	case time.Time:
-		fmt.Print(v.Format("2006-01-02 15:04:05.999"))
+		return v.Format("2006-01-02 15:04:05.999")
 	default:
-		fmt.Print(v)
+		if str, ok := v.(string); ok {
+			return string(str)
+		}
+		return ""
 	}
 }

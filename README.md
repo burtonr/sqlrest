@@ -6,7 +6,50 @@ The idea came from the ~need~ want to turn full size APIs into a group of server
 
 The thought is to create an ultra-minimalist API that acts as a proxy in front of a database in order to maintain the connection, as well as handle the pooling while the functions can focus on being functional.
 
-The function would build the required SQL statment to be executed, and send it to SqlRest for execution on the remote DB. SqlRest does nothing more than passing the query (or procedure name) to the connected database server for execution. The response will depend on the route/command. Select/Query would return a json array of columnName: columnValue
+The function would build the required SQL statment to be executed, and send it to SqlRest for execution on the remote DB. SqlRest does nothing more than passing the query (or procedure name) to the connected database server for execution. The response will depend on the route/command. Select/Query would return a json array of column names and row results
+Example Results:
+```
+data: {
+  [
+      [
+        "Column1",
+        "Column2"
+      ],
+      [
+        "Result1_1",
+        "Result1_2"
+      ],
+      [
+        "Result2_1",
+        "Result2_2"
+      ]
+    ]
+}
+```
+Errors will be returned with an appropriate HTTP response code and a "message" property containing the reason of the error
+
+Example Error Result:
+```
+{
+  "message": "Query must contain at least 1 'SELECT' statement for 'Query' operation"
+}
+```
+Also, errors encountered in the database will include an "error" property with the error being passed directly from the database
+Example DB Error Response:
+```
+{
+  "error": {
+    "Number": 102,
+    "State": 1,
+    "Class": 15,
+    "Message": "Incorrect syntax near 'Blah:'.",
+    "ServerName": "efe87d4ca854",
+    "ProcName": "",
+    "LineNo": 1
+  },
+  "message": "Error returned from database"
+}
+```
 
 ## _Notes_ 
 ### API
