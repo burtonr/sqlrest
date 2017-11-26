@@ -6,10 +6,12 @@ import (
 	"time"
 )
 
-type SqlDatabase struct {
+// SQLDatabase The basic struct to hold the connection
+type SQLDatabase struct {
 	Connection *sql.DB
 }
 
+// GetConnection Make a connection to the database to execute queries against
 func GetConnection() (*sql.DB, error) {
 	userid := "sa"
 	password := "p@ssw0rd"
@@ -31,6 +33,8 @@ func GetConnection() (*sql.DB, error) {
 	return connection, err
 }
 
+// Execute Run the provided command and return the results in a 2 dimensional slice
+// where slice[0] are column names, and all other slices are the resulting rows
 func Execute(db *sql.DB, cmd string) ([][]string, error) {
 	rows, err := db.Query(cmd)
 	if err != nil {
@@ -45,8 +49,8 @@ func Execute(db *sql.DB, cmd string) ([][]string, error) {
 		return nil, nil
 	}
 
-	// TODO: Somehow need to dynamically allocate the slice size based on the amount of rows being returned
-	results := make([][]string, 3)
+	// Start with a slice only large enough to hold the column names
+	results := make([][]string, 1)
 	results[0] = cols
 
 	vals := make([]interface{}, len(cols))
@@ -63,12 +67,14 @@ func Execute(db *sql.DB, cmd string) ([][]string, error) {
 			continue
 		}
 
-		results[rowCount] = append(make([]string, len(cols)))
+		rowSlice := make([]string, len(cols))
 
 		for i := 0; i < len(vals); i++ {
-			results[rowCount][i] = printValue(vals[i].(*interface{}))
+			rowSlice[i] = printValue(vals[i].(*interface{}))
 		}
 		rowCount++
+		// Append the row data to the result slice (possibly not the most efficient way to do this...)
+		results = append(results, rowSlice)
 	}
 	if rows.Err() != nil {
 		return nil, rows.Err()
@@ -93,6 +99,6 @@ func printValue(pval *interface{}) string {
 		if str, ok := v.(string); ok {
 			return string(str)
 		}
-		return ""
+		return fmt.Sprint(v)
 	}
 }

@@ -9,10 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func setupRouter(db *database.SqlDatabase) *gin.Engine {
+func setupRouter(db *database.SQLDatabase) *gin.Engine {
 	r := gin.Default()
 
-	// Ping test
+	// Health check
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
 	})
@@ -36,7 +36,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	db := &database.SqlDatabase{Connection: conn}
+	db := &database.SQLDatabase{Connection: conn}
 
 	r := setupRouter(db)
 	r.Run(":8080")

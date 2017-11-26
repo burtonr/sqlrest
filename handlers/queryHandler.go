@@ -9,11 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// QueryRequest A struct to hold the body of the query request with a property of "query"
 type QueryRequest struct {
 	Query string
 }
 
-func ExecuteQuery(connection *database.SqlDatabase) gin.HandlerFunc {
+// ExecuteQuery HttpHandler to validate and execute a 'SELECT' command to the database
+func ExecuteQuery(connection *database.SQLDatabase) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		var params QueryRequest
 		c.BindJSON(&params)
