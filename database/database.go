@@ -6,37 +6,47 @@ import (
 	"time"
 )
 
-// SQLDatabase The basic struct to hold the connection
 type SQLDatabase struct {
 	Connection *sql.DB
 }
 
-// GetConnection Make a connection to the database to execute queries against
-func GetConnection() (*sql.DB, error) {
-	userid := "sa"
-	password := "p@ssw0rd"
-	server := "localhost"
+var sqlDb SQLDatabase
 
-	dsn := "server=" + server + ";user id=" + userid + ";password=" + password // + ";database=" + database
+// GetConnection Make a connection to the database to execute queries against
+func GetConnection() (bool, error) {
+	if sqlDb.Connection != nil {
+		err := sqlDb.Connection.Ping()
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+
+	userid := "sa"         // os.Getenv("DATABASE_USERNAME")
+	password := "p@ssw0rd" // os.Getenv("DATABASE_PASSWORD")
+	server := "localhost"  // os.Getenv("DATABASE_SERVER")
+
+	dsn := "server=" + server + ";user id=" + userid + ";password=" + password
 
 	connection, err := sql.Open("mssql", dsn)
 	if err != nil {
-		fmt.Println("Cannot connect: ", err.Error())
-		return nil, err
+		return false, err
 	}
+
 	err = connection.Ping()
 	if err != nil {
-		fmt.Println("Cannot connect: ", err.Error())
-		return nil, err
+		return false, err
 	}
 
-	return connection, err
+	sqlDb = SQLDatabase{Connection: connection}
+	return true, nil
 }
 
-// Execute Run the provided command and return the results in a 2 dimensional slice
+// ExecuteQuery Run the provided command and return the results in a 2 dimensional slice
 // where slice[0] are column names, and all other slices are the resulting rows
-func Execute(db *sql.DB, cmd string) ([][]string, error) {
-	rows, err := db.Query(cmd)
+func ExecuteQuery(cmd string) ([][]string, error) {
+	rows, err := sqlDb.Connection.Query(cmd)
+	// rows, err := db.Query(cmd)
 	if err != nil {
 		return nil, err
 	}

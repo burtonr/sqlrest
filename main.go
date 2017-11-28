@@ -1,7 +1,10 @@
 package main
 
 import (
-	"log"
+	"database/sql"
+	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/BurtonR/sqlrest/database"
 	"github.com/BurtonR/sqlrest/handlers"
@@ -9,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func setupRouter(db *database.SQLDatabase) *gin.Engine {
+func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	// Health check
@@ -17,9 +20,20 @@ func setupRouter(db *database.SQLDatabase) *gin.Engine {
 		c.String(200, "pong")
 	})
 
+	r.GET("/connect", func(c *gin.Context) {
+		connected, err := database.GetConnection()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to connect"})
+			return
+		}
+		if connected {
+			c.JSON(http.StatusOK, gin.H{"message": "connected"})
+		}
+	})
+
 	v1 := r.Group("v1")
 	{
-		v1.POST("/query", handlers.ExecuteQuery(db))
+		v1.POST("/query", handlers.ExecuteQuery)
 		v1.POST("/update", handlers.ExecuteUpdate)
 		v1.PUT("/insert", handlers.ExecuteInsert)
 		v1.DELETE("/delete", handlers.ExecuteDelete)
@@ -30,14 +44,49 @@ func setupRouter(db *database.SQLDatabase) *gin.Engine {
 }
 
 func main() {
-	conn, err := database.GetConnection()
+	connectToDb()
 
-	if err != nil {
-		log.Panic(err)
+	ticker := time.NewTicker(2 * time.Minute)
+	quit := make(chan struct{})
+	go pinger(ticker, quit)
+
+	r := setupRouter()
+	r.Run(":8080")
+}
+
+func pinger(ticker *time.Ticker, quit chan struct{}) {
+	for {
+		select {
+		case <-ticker.C:
+			fmt.Printf("pinging")
+			connectToDb()
+		case <-quit:
+			ticker.Stop()
+			return
+		}
+	}
+}
+
+func connectToDb() {
+	maxRetries := 2
+	var conn *sql.DB
+	for i := 0; i < maxRetries; i++ {
+		connected, err := database.GetConnection()
+		if err != nil {
+			fmt.Printf("Unable to connect. Attempt %d of %d", i+1, maxRetries)
+			fmt.Println()
+		}
+		if connected {
+			return
+		}
+
+		time.Sleep(500 * time.Millisecond)
 	}
 
-	db := &database.SQLDatabase{Connection: conn}
+	if conn == nil {
+		fmt.Printf("No database connection after %d attempts", maxRetries)
+		fmt.Println()
+	}
 
-	r := setupRouter(db)
-	r.Run(":8080")
+	return
 }

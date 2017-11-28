@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -15,33 +15,30 @@ type QueryRequest struct {
 }
 
 // ExecuteQuery HttpHandler to validate and execute a 'SELECT' command to the database
-func ExecuteQuery(connection *database.SQLDatabase) gin.HandlerFunc {
-	return gin.HandlerFunc(func(c *gin.Context) {
-		var params QueryRequest
-		c.BindJSON(&params)
-		cmd := params.Query
-		strings.TrimSpace(cmd)
+func ExecuteQuery(c *gin.Context) {
+	var params QueryRequest
+	c.BindJSON(&params)
+	cmd := params.Query
+	strings.TrimSpace(cmd)
 
-		if cmd == "" {
-			c.JSON(400, gin.H{"message": "You must supply a query"})
-			return
-		}
+	if cmd == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "You must supply a query"})
+		return
+	}
 
-		rex := regexp.MustCompile("(?i)select")
-		selects := rex.FindAllString(cmd, -1)
+	rex := regexp.MustCompile("(?i)select")
+	selects := rex.FindAllString(cmd, -1)
 
-		if len(selects) < 1 {
-			c.JSON(400, gin.H{"message": "Query must contain at least 1 'SELECT' statement for 'Query' operation"})
-			return
-		}
+	if len(selects) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Query must contain at least 1 'SELECT' statement for 'Query' operation"})
+		return
+	}
 
-		data, err := database.Execute(connection.Connection, cmd)
-		if err != nil {
-			fmt.Println(err)
-			c.JSON(500, gin.H{"message": "Error returned from database", "error": err})
-			return
-		}
+	data, err := database.ExecuteQuery(cmd)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error returned from database", "error": err.Error()})
+		return
+	}
 
-		c.JSON(200, gin.H{"data": data})
-	})
+	c.JSON(http.StatusOK, gin.H{"data": data})
 }
