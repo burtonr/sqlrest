@@ -51,14 +51,13 @@ func main() {
 	go pinger(ticker, quit)
 
 	r := setupRouter()
-	r.Run(":8080")
+	r.Run(":5050")
 }
 
 func pinger(ticker *time.Ticker, quit chan struct{}) {
 	for {
 		select {
 		case <-ticker.C:
-			fmt.Printf("pinging")
 			connectToDb()
 		case <-quit:
 			ticker.Stop()

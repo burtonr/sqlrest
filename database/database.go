@@ -3,9 +3,11 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 )
 
+// SQLDatabase struct to hold the connection
 type SQLDatabase struct {
 	Connection *sql.DB
 }
@@ -22,9 +24,9 @@ func GetConnection() (bool, error) {
 		return true, nil
 	}
 
-	userid := "sa"         // os.Getenv("DATABASE_USERNAME")
-	password := "p@ssw0rd" // os.Getenv("DATABASE_PASSWORD")
-	server := "localhost"  // os.Getenv("DATABASE_SERVER")
+	userid := os.Getenv("DATABASE_USERNAME")
+	password := os.Getenv("DATABASE_PASSWORD")
+	server := os.Getenv("DATABASE_SERVER")
 
 	dsn := "server=" + server + ";user id=" + userid + ";password=" + password
 
