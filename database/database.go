@@ -27,8 +27,13 @@ func GetConnection() (bool, error) {
 	userid := os.Getenv("DATABASE_USERNAME")
 	password := os.Getenv("DATABASE_PASSWORD")
 	server := os.Getenv("DATABASE_SERVER")
+	database := os.Getenv("DATABASE_NAME")
 
 	dsn := "server=" + server + ";user id=" + userid + ";password=" + password
+
+	if len(database) != 0 {
+		dsn += ";database=" + database
+	}
 
 	connection, err := sql.Open("mssql", dsn)
 	if err != nil {
