@@ -48,7 +48,6 @@ func GetConnection() (bool, error) {
 // where slice[0] are column names, and all other slices are the resulting rows
 func ExecuteQuery(cmd string) ([][]string, error) {
 	rows, err := sqlDb.Connection.Query(cmd)
-	// rows, err := db.Query(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +91,26 @@ func ExecuteQuery(cmd string) ([][]string, error) {
 		return nil, rows.Err()
 	}
 	return results, nil
+}
+
+// ExecuteUpdate opens a transaction and executes the cmd. Rollback happens if there is an error
+func ExecuteUpdate(cmd string) error {
+	tx, err := sqlDb.Connection.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+	if _, err = tx.Exec(cmd); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func printValue(pval *interface{}) string {
