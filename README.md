@@ -108,10 +108,24 @@ See above for examples of error and success responses
 
 #### Insert
 _Not yet implemented_
+
 #### Delete
 _Not yet implemented_
+
 #### Update
-_Not yet implemented_
+Sending a `POST` request to thie endpoint to execute a SQL update
+
+There are some basic syntax checks.
+* There must be a field `update` in the request
+* There must be at least 1 `UPDATE` command
+* There must be at least 1 `WHERE` clause
+  * This is for your own protection!
+
+The function that handles executing updates will first create a transaction, then execute the command. If there is an error, or something goes wrong (`panic`), the transaction will roll back. 
+
+The request and command passed in follow the same rules as the `Query` endpoint. Be sure to include the database name
+
+No results are returned with this command. To get the updated values, you will need to `Query` again.
 
 
 # Security
@@ -140,3 +154,8 @@ This (mostly) follows the familiar REST practices as well as special handling of
 * Look in to implementing HMAC security or possibly API keys
   * Something that's easily added to a serverless function, Docker container, or other API, but still secure
 * Security may be required to limit access to certain functions (no deletes), or certain databases, possibly even certain tables
+
+## Considerations
+* Should the `Update` and `Insert` calls return the modified/created entry?
+  * I like that from a uasability perspective so you don't need to make 2 calls
+  * On the otherhand, what about performance? If I (caller) don't need the result, why wait for it?
