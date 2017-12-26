@@ -116,7 +116,7 @@ This endpoint builds the SQL command to be executed as a string.
 
 The above example will generate the following string to be sent to the SQL server:
 
-    EXEC sp_get_customers @title = "scuba", @firstName = "Steve"
+    EXEC sales.dbo.sp_get_customers @title = "scuba", @firstName = "Steve"
 
 #### Query
 Send a `POST` request to this endpoint to execute a SQL query and get the results back
