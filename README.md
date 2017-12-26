@@ -54,9 +54,9 @@ Example DB Error Response:
 # Run with Docker
 Pull the image from [Docker Hub](https://hub.docker.com):
 
-    docker pull burtonr/sqlrest
+    docker pull burtonr/sqlrest:0.2
 
-#### Environment variables that need to be set
+#### Required Environment variables
 |Name | Value |
 |-----|-------|
 |DATABASE_USERNAME  | The username to log in to the SQL Server with |
@@ -65,7 +65,13 @@ Pull the image from [Docker Hub](https://hub.docker.com):
 
 Run the image with the following command (replacing the environment variables with your own)
 
-    docker run -d -p 5050:5050 -e DATABASE_USERNAME=sa -e DATABASE_PASSWORD=secretSauce2! -e DATABASE_SERVER=172.17.0.2 --name sqlrest burtonr/sqlrest:latest
+    docker run -d -p 5050:5050 -e DATABASE_USERNAME=sa -e DATABASE_PASSWORD=secretSauce2! -e DATABASE_SERVER=172.17.0.2 --name sqlrest burtonr/sqlrest:0.2
+
+
+#### Optional Environment variables
+|Name | Value | Default |
+|-----|-------|---------|
+|DATABASE_NAME  | The name of the database to connect to | _blank_ (i.e. `master`) |
 
 
 # Usage
