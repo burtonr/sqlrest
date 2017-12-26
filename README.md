@@ -93,7 +93,30 @@ There is a process that runs every 2 minutes to ping the database that will reco
 If it is already connected, it will return with a success, otherwise it will attempt the connection and return either a `200` or `500`
 
 #### Procedure
-_Not yet implemented_
+Send a `POST` request to this endpoint to execute a SQL stored procedure and optionally get the results back
+
+* The request body **must** contain a `name` property.
+  * You must include the full name of the procedure unless you've set the `DATABASE_NAME` env var. By default, this will run against the `master` database
+* Optionally, also include a `parameters` object that includes the parameter name and value
+* Additionally, you may also specify a flag `executeOnly` that, when false, returns the result set from the stored procedure
+
+A full request (to execute with parameters and return the results) would look like this:
+
+    {
+      "name": "sales.dbo.sp_get_customers",
+      "parameters": {
+        "title": "scuba",
+        "firstName": "Steve",
+      },
+      "executeOnly": false
+    }
+The `executeOnly` property defaults to **true** so that procedures will not return values unless explicitly requested
+
+This endpoint builds the SQL command to be executed as a string. 
+
+The above example will generate the following string to be sent to the SQL server:
+
+    EXEC sp_get_customers @title = "scuba", @firstName = "Steve"
 
 #### Query
 Send a `POST` request to this endpoint to execute a SQL query and get the results back

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -118,6 +119,32 @@ func ExecuteWithTransaction(cmd string) error {
 	}
 
 	return nil
+}
+
+// ExecuteStatement executes the supplied procedure with parameters and returns results only if returnResults param is true
+func ExecuteStatement(name string, executeOnly bool, parameters map[string]*interface{}) ([][]string, error) {
+	statement := "EXEC " + name + " "
+
+	for key, value := range parameters {
+		statement += "@" + key + " = " + printValue(value) + ", "
+	}
+
+	statement = strings.TrimRight(statement, ", ")
+
+	if executeOnly {
+		if _, err := sqlDb.Connection.Exec(statement); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	results, err := ExecuteQuery(statement)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
 
 func printValue(pval *interface{}) string {
