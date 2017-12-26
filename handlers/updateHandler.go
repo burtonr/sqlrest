@@ -42,7 +42,7 @@ func ExecuteUpdate(c *gin.Context) {
 		return
 	}
 
-	err := database.ExecuteUpdate(cmd)
+	err := database.ExecuteWithTransaction(cmd)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error returned from database", "error": err.Error()})
 		return

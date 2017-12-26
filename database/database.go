@@ -35,6 +35,8 @@ func GetConnection() (bool, error) {
 		dsn += ";database=" + database
 	}
 
+	fmt.Println(dsn)
+
 	connection, err := sql.Open("mssql", dsn)
 	if err != nil {
 		return false, err
@@ -98,8 +100,8 @@ func ExecuteQuery(cmd string) ([][]string, error) {
 	return results, nil
 }
 
-// ExecuteUpdate opens a transaction and executes the cmd. Rollback happens if there is an error
-func ExecuteUpdate(cmd string) error {
+// ExecuteWithTransaction opens a transaction and executes the cmd. Rollback happens if there is an error
+func ExecuteWithTransaction(cmd string) error {
 	tx, err := sqlDb.Connection.Begin()
 	if err != nil {
 		return err
