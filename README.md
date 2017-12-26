@@ -90,10 +90,10 @@ If it is already connected, it will return with a success, otherwise it will att
 _Not yet implemented_
 
 #### Query
-Sending a `POST` request to this endpoint to execute a SQL query and get the results back
+Send a `POST` request to this endpoint to execute a SQL query and get the results back
 
 There are some basic syntax checks. 
-* There must be a field `query` in the request
+* There must be a field `query` in the request body
 * There must be at least 1 `SELECT` command 
 * _told you it was basic..._
 
@@ -104,19 +104,31 @@ _or_ use the full object name in the table definition
 
 >`SELECT 1 FROM [Database_Name].[dbo].[Table_Name]`
 
+You could also set the environment variable `DATABASE_NAME` to set a default database name. Note, that if the default schema is not `dbo`, you will need to include that in the query as well even with the database name being set.
+
 See above for examples of error and success responses
 
 #### Insert
-_Not yet implemented_
+Send a `PUT` request to this endpoint to execure a SQL insert
+
+There are some basic syntax checks.
+* There must be a field `insert` in the request body
+* There must be at least 1 `INSERT INTO` command
+
+The function that handles executing inserts will first create a transaction, then execute the command. If there is an error, or something goes wrong (`panic`), the transaction will roll back.
+
+The request and command passed in follow the same rules as the `Query` endpoint. Be sure to include the database name
+
+No results are returned with this command. To get the inserted values, you will need to `Query` for them.
 
 #### Delete
 _Not yet implemented_
 
 #### Update
-Sending a `POST` request to thie endpoint to execute a SQL update
+Send a `POST` request to this endpoint to execute a SQL update
 
 There are some basic syntax checks.
-* There must be a field `update` in the request
+* There must be a field `update` in the request body
 * There must be at least 1 `UPDATE` command
 * There must be at least 1 `WHERE` clause
   * This is for your own protection!
@@ -125,7 +137,7 @@ The function that handles executing updates will first create a transaction, the
 
 The request and command passed in follow the same rules as the `Query` endpoint. Be sure to include the database name
 
-No results are returned with this command. To get the updated values, you will need to `Query` again.
+No results are returned with this command. To get the updated values, you will need to `Query`.
 
 
 # Security
