@@ -3,10 +3,14 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+// For inspiration: https://github.com/tjoudeh/WebApiHMACAuthentication/blob/master/HMACAuthentication.WebApi/Filters/HMACAuthenticationAttribute.cs
+// article: http://bitoftech.net/2014/12/15/secure-asp-net-web-api-using-api-key-authentication-hmac-authentication/
 
 // HmacAuthentication checks the Authorization header for proper HMAC values
 func HmacAuthentication(c *gin.Context) {
@@ -43,13 +47,14 @@ func HmacAuthentication(c *gin.Context) {
 }
 
 func verifyRealm(realm string) bool {
-	// allowedRealmsVar := os.Getenv("SQLREST_ALLOWED_REALMS")
-	allowedRealmsVar := "kgb-functions"
+	allowedRealmsVar := os.Getenv("SQLREST_ALLOWED_REALMS")
+	// allowedRealmsVar := "kgb-functions, burton-func"
 
 	allowedRealms := strings.Split(allowedRealmsVar, ",")
 
 	for _, allowed := range allowedRealms {
-		if realm == allowed {
+		fmt.Println(allowed)
+		if realm == strings.TrimSpace(allowed) {
 			return true
 		}
 	}
