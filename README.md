@@ -86,7 +86,26 @@ The API exposes the following endpoints:
 
 _(the `v1` is an example of the API version that will update as breaking changes happen)_
 
-### Connect
+## Headers
+Each request must include an `Authorization` header
+
+The value of this header includes 4 parts separated by a colon ( `:` )
+
+* Realm
+  * This is the origination of the request. The accepted values are read from the `SQLREST_ALLOWED_REALMS` environment variable
+* Signature
+  * This is the hash of the message + api key used to validate that the request was not altered
+* Nonce
+  * Unique value per request to prevent replay attacks (may be removed to rely on timestamp only)
+* Timestamp
+  * This is the epoch time in milliseconds (time since Jan 1, 1970)
+
+Example:
+```
+Authorization: testing-func:0C0100928269F1450B2EBEE4FCEAFD237069C414189A00BA109ED4D5FEF80D58:bbd37ca7-f270-45ee-9e5c-fa4a5de59a30:1520527620822
+```
+
+#### Connect
 Sending a `GET` request to this endpoint forces the API to attempt to reconnect to the database using the environment variables provided.
 
 There is a process that runs every 2 minutes to ping the database that will reconnect if it fails. Use this endpoint if you don't want to wait for that process to run

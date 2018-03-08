@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,23 +34,34 @@ func HmacAuthentication(c *gin.Context) {
 	realm := secrets[0]
 	signature := secrets[1]
 	nonce := secrets[2]
-	timestamp := secrets[3]
+	timestring := secrets[3]
 
 	if !verifyRealm(realm) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
+	// TODO implement checks for signature and nonce
 	fmt.Println("Need to verify Signature:", signature)
 	fmt.Println("Need to verify Nonce:", nonce)
-	fmt.Println("Need to verify TimeStamp:", timestamp)
+
+	timeInt, err := strconv.ParseInt(timestring, 10, 64)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if !verifyTimestamp(timeInt) {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
 	return
 }
 
 func verifyRealm(realm string) bool {
 	allowedRealmsVar := os.Getenv("SQLREST_ALLOWED_REALMS")
-	// allowedRealmsVar := "kgb-functions, burton-func"
+	// allowedRealmsVar := "burton-func, testing-func"
 
 	allowedRealms := strings.Split(allowedRealmsVar, ",")
 
@@ -59,4 +72,10 @@ func verifyRealm(realm string) bool {
 		}
 	}
 	return false
+}
+
+func verifyTimestamp(timestamp int64) bool {
+	currentTime := time.Now().UnixNano() / 1000000 // in milliseconds
+	difference := currentTime - timestamp
+	return difference < 2000 // deny requests more than 2 seconds ago
 }
