@@ -1,5 +1,5 @@
 # sqlrest
-A simple GoLang RESTful api proxy to a database
+ sqlrest is an API proxy for MS-SQL databases for easier database access in serverless functions 
 
 # About
 The idea came from the ~need~ want to turn full size APIs into a group of serverless functions. It was quickly discovered that the connections to a database take around 5-7 seconds. No good for a serverless function!
@@ -62,10 +62,12 @@ Pull the image from [Docker Hub](https://hub.docker.com):
 |DATABASE_USERNAME  | The username to log in to the SQL Server with |
 |DATABASE_PASSWORD  | The password associated with the user |
 |DATABASE_SERVER | The IP address, or hostname, of the SQL server. Do not include the instance, or port number, we got that covered for you (assuming 1433 (default)) :) |
+|SQLREST_ALLOWED_REALMS | A comma separated list of strings to designate what service is permitted to access this instance of sqlrest |
+|SQLREST_API_KEY | The shared secret key used to hash the request
 
 Run the image with the following command (replacing the environment variables with your own)
 
-    docker run -d -p 5050:5050 -e DATABASE_USERNAME=sa -e DATABASE_PASSWORD=secretSauce2! -e DATABASE_SERVER=172.17.0.2 --name sqlrest burtonr/sqlrest:0.2
+    docker run -d -p 5050:5050 -e DATABASE_USERNAME=sa -e DATABASE_PASSWORD=secretSauce2! -e DATABASE_SERVER=172.17.0.2 -e SQLREST_ALLOWED_REALMS=test-func,qa-func -e SQLREST_API_KEY=sqlrestTestKey --name sqlrest burtonr/sqlrest:0.2
 
 
 #### Optional Environment variables
@@ -112,6 +114,8 @@ There is a process that runs every 2 minutes to ping the database that will reco
 
 If it is already connected, it will return with a success, otherwise it will attempt the connection and return either a `200` or `500`
 
+> Note: For this `GET` request, the `signature` section of the `Authorization` header is not evaluated and may be left blank
+
 #### Procedure
 Send a `POST` request to this endpoint to execute a SQL stored procedure and optionally get the results back
 
@@ -146,7 +150,9 @@ There are some basic syntax checks.
 * There must be at least 1 `SELECT` command 
 * _told you it was basic..._
 
-The query passed in is sent to the database directly with no modifications. **Note:** SQL connects to the `master` database by default, so be sure to include a `USE` statement
+The query passed in is sent to the database directly with no modifications. 
+
+**Note:** SQL connects to the `master` database by default, so be sure to include a `USE` statement
 > `USE Database_Name; SELECT 1 FROM Table_Name` 
 
 _or_ use the full object name in the table definition
@@ -190,9 +196,14 @@ No results are returned with this command. To get the updated values, you will n
 
 
 # Security
-* Yes, this is the very definition of SQL Injection, and it's intentional
-  * This is intended to act like a database, but easier for serverless by using http protocol and managing the connection
-  * Treat it like database access and secure the network around it
+sqlrest uses HMAC authorization to validate the requests being sent. The `Authorization` header is used to send the validation criteria to sqlrest (see [Headers](#Headers))
+
+The validation uses the following environment variables:
+* `SQLREST_ALLOWED_REALMS`
+  * This is a comma separated list of strings to designate what service is permitted to call sqlrest
+* `SQLREST_API_KEY`
+  * This is the shared secret key that is used to hash the request
+
 ___
 
 ## _Developer Notes_ 
