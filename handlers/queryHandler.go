@@ -40,5 +40,5 @@ func ExecuteQuery(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": data})
+	c.JSON(http.StatusOK, data)
 }

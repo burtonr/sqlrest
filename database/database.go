@@ -13,6 +13,12 @@ type SQLDatabase struct {
 	Connection *sql.DB
 }
 
+// Results contains the column names and the data
+type Results struct {
+	Columns []string
+	Data    [][]string
+}
+
 var sqlDb SQLDatabase
 
 // GetConnection Make a connection to the database to execute queries against
@@ -54,7 +60,7 @@ func GetConnection() (bool, error) {
 
 // ExecuteQuery Run the provided command and return the results in a 2 dimensional slice
 // where slice[0] are column names, and all other slices are the resulting rows
-func ExecuteQuery(cmd string) ([][]string, error) {
+func ExecuteQuery(cmd string) (*Results, error) {
 	rows, err := sqlDb.Connection.Query(cmd)
 	if err != nil {
 		return nil, err
@@ -68,9 +74,9 @@ func ExecuteQuery(cmd string) ([][]string, error) {
 		return nil, nil
 	}
 
-	// Start with a slice only large enough to hold the column names
-	results := make([][]string, 1)
-	results[0] = cols
+	var results Results
+	results.Columns = cols
+	results.Data = make([][]string, 0)
 
 	vals := make([]interface{}, len(cols))
 	for i := 0; i < len(cols); i++ {
@@ -93,12 +99,12 @@ func ExecuteQuery(cmd string) ([][]string, error) {
 		}
 		rowCount++
 		// Append the row data to the result slice (possibly not the most efficient way to do this...)
-		results = append(results, rowSlice)
+		results.Data = append(results.Data, rowSlice)
 	}
 	if rows.Err() != nil {
 		return nil, rows.Err()
 	}
-	return results, nil
+	return &results, nil
 }
 
 // ExecuteWithTransaction opens a transaction and executes the cmd. Rollback happens if there is an error
@@ -122,7 +128,7 @@ func ExecuteWithTransaction(cmd string) error {
 }
 
 // ExecuteStatement executes the supplied procedure with parameters and returns results only if returnResults param is true
-func ExecuteStatement(name string, executeOnly bool, parameters map[string]*interface{}) ([][]string, error) {
+func ExecuteStatement(name string, executeOnly bool, parameters map[string]*interface{}) (*Results, error) {
 	statement := "EXEC " + name + " "
 
 	for key, value := range parameters {
