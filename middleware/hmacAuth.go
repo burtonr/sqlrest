@@ -90,6 +90,10 @@ func verifySignature(signature string, c *gin.Context) bool {
 	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 	bodyString := string(bodyBytes)
 
+	if c.Request.Method == "GET" && c.Request.ContentLength < 1 {
+		return true
+	}
+
 	apiKey := os.Getenv("SQLREST_API_KEY")
 	// apiKey := "sqlrestTestKey"
 
