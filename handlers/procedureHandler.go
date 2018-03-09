@@ -65,7 +65,7 @@ func ExecuteProcedure(c *gin.Context) {
 	}
 
 	if !execOnly {
-		c.JSON(http.StatusOK, gin.H{"data": results})
+		c.JSON(http.StatusOK, results)
 		return
 	}
 

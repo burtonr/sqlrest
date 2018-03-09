@@ -6,15 +6,16 @@ The idea came from the ~need~ want to turn full size APIs into a group of server
 
 The thought is to create an ultra-minimalist API that acts as a proxy in front of a database in order to maintain the connection, as well as handle the pooling while the functions can focus on being functional.
 
-The function would build the required SQL statment to be executed, and send it to SqlRest for execution on the remote DB. SqlRest does nothing more than passing the query (or procedure name) to the connected database server for execution. The response will depend on the route/command. Select/Query would return a json array of column names and row results
+The function would build the required SQL statment to be executed, and send it to SqlRest for execution on the remote DB. SqlRest does nothing more than passing the query (or procedure name) to the connected database server for execution. The response will depend on the route/command. Select/Query would return a json object with an array of column names and an array of arrays of row results
+
 Example Results:
 ```
-data: {
-  [
-      [
+{
+  "Columns": [
         "Column1",
         "Column2"
-      ],
+  ],
+  "Data": [
       [
         "Result1_1",
         "Result1_2"
@@ -23,7 +24,7 @@ data: {
         "Result2_1",
         "Result2_2"
       ]
-    ]
+  ]
 }
 ```
 Errors will be returned with an appropriate HTTP response code and a "message" property containing the reason of the error
@@ -85,14 +86,14 @@ The API exposes the following endpoints:
 
 _(the `v1` is an example of the API version that will update as breaking changes happen)_
 
-#### Connect
+### Connect
 Sending a `GET` request to this endpoint forces the API to attempt to reconnect to the database using the environment variables provided.
 
 There is a process that runs every 2 minutes to ping the database that will reconnect if it fails. Use this endpoint if you don't want to wait for that process to run
 
 If it is already connected, it will return with a success, otherwise it will attempt the connection and return either a `200` or `500`
 
-#### Procedure
+### Procedure
 Send a `POST` request to this endpoint to execute a SQL stored procedure and optionally get the results back
 
 * The request body **must** contain a `name` property.
@@ -118,7 +119,7 @@ The above example will generate the following string to be sent to the SQL serve
 
     EXEC sales.dbo.sp_get_customers @title = "scuba", @firstName = "Steve"
 
-#### Query
+### Query
 Send a `POST` request to this endpoint to execute a SQL query and get the results back
 
 There are some basic syntax checks. 
@@ -137,7 +138,7 @@ You could also set the environment variable `DATABASE_NAME` to set a default dat
 
 See above for examples of error and success responses
 
-#### Insert
+### Insert
 Send a `PUT` request to this endpoint to execure a SQL insert
 
 There are some basic syntax checks.
@@ -150,10 +151,10 @@ The request and command passed in follow the same rules as the `Query` endpoint.
 
 No results are returned with this command. To get the inserted values, you will need to `Query` for them.
 
-#### Delete
+### Delete
 _Not yet implemented_
 
-#### Update
+### Update
 Send a `POST` request to this endpoint to execute a SQL update
 
 There are some basic syntax checks.
