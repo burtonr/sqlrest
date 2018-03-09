@@ -94,7 +94,8 @@ The value of this header includes 4 parts separated by a colon ( `:` )
 * Realm
   * This is the origination of the request. The accepted values are read from the `SQLREST_ALLOWED_REALMS` environment variable
 * Signature
-  * This is the hash of the message + api key used to validate that the request was not altered
+  * This is the hmac hash of the message + api key used to validate that the request was not altered e.g. _Hash(apikey + Hash(body + apikey))_
+  * References here: [Wikipedia](https://en.wikipedia.org/wiki/HMAC), [RFC2104](https://tools.ietf.org/html/rfc2104), and [Acquia](https://github.com/acquia/http-hmac-spec)
 * Nonce
   * Unique value per request to prevent replay attacks (may be removed to rely on timestamp only)
 * Timestamp
@@ -102,7 +103,7 @@ The value of this header includes 4 parts separated by a colon ( `:` )
 
 Example:
 ```
-Authorization: testing-func:0C0100928269F1450B2EBEE4FCEAFD237069C414189A00BA109ED4D5FEF80D58:bbd37ca7-f270-45ee-9e5c-fa4a5de59a30:1520527620822
+Authorization: testing-func:fb1ded9f15a6d8134b3db1640c21cff2b0b22860a1720c54e7fd4938ba46b7f2:bbd37ca7-f270-45ee-9e5c-fa4a5de59a30:1520527620822
 ```
 
 #### Connect

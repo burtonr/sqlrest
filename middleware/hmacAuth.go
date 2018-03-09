@@ -1,7 +1,12 @@
 package middleware
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -17,7 +22,6 @@ import (
 // HmacAuthentication checks the Authorization header for proper HMAC values
 func HmacAuthentication(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
-	fmt.Println(authHeader)
 
 	if authHeader == "null" || len(authHeader) < 1 {
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -41,8 +45,12 @@ func HmacAuthentication(c *gin.Context) {
 		return
 	}
 
-	// TODO implement checks for signature and nonce
-	fmt.Println("Need to verify Signature:", signature)
+	if !verifySignature(signature, c) {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// TODO implement check for nonce
 	fmt.Println("Need to verify Nonce:", nonce)
 
 	timeInt, err := strconv.ParseInt(timestring, 10, 64)
@@ -66,12 +74,35 @@ func verifyRealm(realm string) bool {
 	allowedRealms := strings.Split(allowedRealmsVar, ",")
 
 	for _, allowed := range allowedRealms {
-		fmt.Println(allowed)
 		if realm == strings.TrimSpace(allowed) {
 			return true
 		}
 	}
 	return false
+}
+
+func verifySignature(signature string, c *gin.Context) bool {
+	// get the request body and re-set it to use later
+	var bodyBytes []byte
+	if c.Request.Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(c.Request.Body)
+	}
+	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	bodyString := string(bodyBytes)
+
+	apiKey := os.Getenv("SQLREST_API_KEY")
+	// apiKey := "sqlrestTestKey"
+
+	// hash the body + apiKey as the inner hmac function
+	innerHash := sha256.Sum256([]byte(bodyString + apiKey))
+	i := innerHash[:]
+	innerString := hex.EncodeToString(i)
+	// hash the apiKey + inner hmac function to get the actual signature
+	outerHash := sha256.Sum256([]byte(apiKey + innerString))
+	b := outerHash[:]
+	expected := hex.EncodeToString(b)
+
+	return 1 == subtle.ConstantTimeCompare([]byte(expected), []byte(signature))
 }
 
 func verifyTimestamp(timestamp int64) bool {
