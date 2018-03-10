@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"bytes"
+	"crypto/hmac"
 	"crypto/sha256"
-	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
@@ -97,16 +97,11 @@ func verifySignature(signature string, c *gin.Context) bool {
 	apiKey := os.Getenv("SQLREST_API_KEY")
 	// apiKey := "sqlrestTestKey"
 
-	// hash the body + apiKey as the inner hmac function
-	innerHash := sha256.Sum256([]byte(bodyString + apiKey))
-	i := innerHash[:]
-	innerString := hex.EncodeToString(i)
-	// hash the apiKey + inner hmac function to get the actual signature
-	outerHash := sha256.Sum256([]byte(apiKey + innerString))
-	b := outerHash[:]
-	expected := hex.EncodeToString(b)
+	mac := hmac.New(sha256.New, []byte(apiKey))
+	mac.Write([]byte(bodyString))
+	expected := hex.EncodeToString(mac.Sum(nil))
 
-	return 1 == subtle.ConstantTimeCompare([]byte(expected), []byte(signature))
+	return hmac.Equal([]byte(expected), []byte(signature))
 }
 
 func verifyTimestamp(timestamp int64) bool {
