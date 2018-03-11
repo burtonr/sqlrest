@@ -1,0 +1,42 @@
+CREATE DATABASE Flights
+GO
+
+USE Flights
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Airlines')
+BEGIN
+  CREATE TABLE Airlines (
+    Id INT PRIMARY KEY,
+    Name VARCHAR(MAX) NOT NULL,
+    IATA VARCHAR(2),
+    ICAO VARCHAR(3),
+    Callsign VARCHAR(MAX)
+  )
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Airports')
+BEGIN
+  CREATE TABLE Airports (
+    Id INT PRIMARY KEY,
+    Name VARCHAR(MAX),
+    City VARCHAR(MAX),
+    Country VARCHAR(MAX),
+    IATA VARCHAR(3),
+    ICAO VARCHAR(4),
+    Latitude DECIMAL(9, 6),
+    Longitude DECIMAL (9, 6)
+  )
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Routes')
+BEGIN
+  CREATE TABLE Routes (
+      AirlineId INT,
+      SourceAirportId INT,
+      DestinationAirportId INT,
+      Stops INT
+  )
+END

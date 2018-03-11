@@ -52,12 +52,16 @@ Example DB Error Response:
 }
 ```
 
+## Examples
+
+There are some examples of how to use SqlRest with various languages in the `examples` directory as well as a sample database
+
 # Run with Docker
 Pull the image from [Docker Hub](https://hub.docker.com):
 
     docker pull burtonr/sqlrest:0.2
 
-#### Required Environment variables
+## Required Environment variables
 |Name | Value |
 |-----|-------|
 |DATABASE_USERNAME  | The username to log in to the SQL Server with |
@@ -71,7 +75,7 @@ Run the image with the following command (replacing the environment variables wi
     docker run -d -p 5050:5050 -e DATABASE_USERNAME=sa -e DATABASE_PASSWORD=secretSauce2! -e DATABASE_SERVER=172.17.0.2 -e SQLREST_ALLOWED_REALMS=test-func,qa-func -e SQLREST_API_KEY=sqlrestTestKey --name sqlrest burtonr/sqlrest:0.2
 
 
-#### Optional Environment variables
+## Optional Environment variables
 |Name | Value | Default |
 |-----|-------|---------|
 |DATABASE_NAME  | The name of the database to connect to | _blank_ (i.e. `master`) |
@@ -108,7 +112,7 @@ Example:
 Authorization: testing-func:fb1ded9f15a6d8134b3db1640c21cff2b0b22860a1720c54e7fd4938ba46b7f2:bbd37ca7-f270-45ee-9e5c-fa4a5de59a30:1520527620822
 ```
 
-#### Connect
+### Connect
 Sending a `GET` request to this endpoint forces the API to attempt to reconnect to the database using the environment variables provided.
 
 There is a process that runs every 2 minutes to ping the database that will reconnect if it fails. Use this endpoint if you don't want to wait for that process to run
@@ -117,7 +121,7 @@ If it is already connected, it will return with a success, otherwise it will att
 
 > Note: For this `GET` request, the `signature` section of the `Authorization` header is not evaluated and may be left blank
 
-#### Procedure
+### Procedure
 Send a `POST` request to this endpoint to execute a SQL stored procedure and optionally get the results back
 
 * The request body **must** contain a `name` property.
