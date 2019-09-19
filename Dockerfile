@@ -1,4 +1,4 @@
-FROM golang:1.8.5 as build
+FROM golang:1.12.9 as build
 WORKDIR /go/src/github.com/BurtonR/sqlrest
 
 COPY vendor         vendor
@@ -10,7 +10,7 @@ COPY main.go        .
 RUN go get
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o sqlrest .
 
-FROM alpine:3.6
+FROM alpine:3.10.2
 WORKDIR /root/
 
 EXPOSE 5050
