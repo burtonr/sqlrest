@@ -4,6 +4,7 @@ WORKDIR /go/src/github.com/BurtonR/sqlrest
 COPY vendor         vendor
 COPY handlers       handlers
 COPY database       database
+COPY middleware     middleware
 COPY main.go        .
 
 RUN go get

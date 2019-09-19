@@ -8,12 +8,14 @@ import (
 
 	"github.com/BurtonR/sqlrest/database"
 	"github.com/BurtonR/sqlrest/handlers"
+	"github.com/BurtonR/sqlrest/middleware"
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/gin-gonic/gin"
 )
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
+	r.Use(middleware.HmacAuthentication)
 
 	// Health check
 	r.GET("/ping", func(c *gin.Context) {
