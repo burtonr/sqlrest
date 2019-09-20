@@ -72,7 +72,7 @@ Pull the image from [Docker Hub](https://hub.docker.com):
 
 Run the image with the following command (replacing the environment variables with your own)
 
-    docker run -d -p 5050:5050 -e DATABASE_USERNAME=sa -e DATABASE_PASSWORD=secretSauce2! -e DATABASE_SERVER=172.17.0.2 -e SQLREST_ALLOWED_REALMS=test-func,qa-func -e SQLREST_API_KEY=sqlrestTestKey --name sqlrest burtonr/sqlrest:0.2
+    docker run -d -p 5050:5050 -e DATABASE_USERNAME=sa -e DATABASE_PASSWORD=secretSauce2! -e DATABASE_SERVER=172.17.0.2 -e SQLREST_ALLOWED_REALMS=testing-func,qa-func -e SQLREST_API_KEY=sqlrestTestKey --name sqlrest burtonr/sqlrest:0.3
 
 
 ## Optional Environment variables
@@ -83,6 +83,7 @@ Run the image with the following command (replacing the environment variables wi
 
 # Usage
 The API exposes the following endpoints:
+* `/ping`
 * `/connect`
 * `v1/procedure`
 * `v1/query`
